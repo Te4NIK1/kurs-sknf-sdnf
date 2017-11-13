@@ -1,0 +1,394 @@
+#include <iostream>
+#include <cstdio>
+#include <cstring>
+
+using namespace std;
+
+string s; // строка, в которую считываем введенную формулу
+bool correct_input; // флаг корректности введенной формулы. Если равен 0 - значит ввод неверный
+string sknf, sdnf; /строки, в которые записываем результат функции
+int kolX; // количество переменных в формуле (нужно для генерации таблицы и ответа)
+string X[11];  // текущие значения каждой переменной (0 или 1)
+
+string indstring(int ind) // функция возвращает текстовое значение переменной по ее номеру
+{
+	switch (ind) {	// свитч - оператор выбора
+		case 1 : return "X1"; // если входной параметр 1 - вернуть тектовое значение, иначе проверять дальше
+		case 2 : return "X2"; // дальше аналогично
+		case 3 : return "X3";
+		case 4 : return "X4";
+		case 5 : return "X5";
+		case 6 : return "X6";
+		case 7 : return "X7";
+		case 8 : return "X8";
+		case 9 : return "X9";
+		case 10 : return "X10";
+	}
+	return "Error"; // сюда мы не должны попадать)
+}
+
+bool check(string input) // функция проверки введенной формулы на корректность по символам
+{
+	for(int i = 0; i < s.size(); i++) { // проходим по строке
+		if ( // если текущий символ строки не совпадает ни с одним из допустимых X,-,>,<,^,v,),(,0-9 то вырадение точно некорректно
+		    s[i] != 'X' &&
+		    s[i] != '-' && 
+			s[i] != '>' && 
+			s[i] != '<' && 
+			s[i] != '^' && 
+			s[i] != 'v' && 
+			s[i] != ')' &&
+			s[i] != '(' &&
+			!isdigit(input[i])) {
+			return 0;
+		}
+	}
+	return 1;
+}
+
+int count(string input) // функция для подсчета количества переменных
+{
+	size_t found; // переменная, в которую будем писать результат поиска по строке
+	
+	found = input.find("X10"); // input.find - функция поиска заданного выражение.
+  	if (found != string::npos) // string::npos - значение, которое вернет поиск, если ничего не нашел
+		return 10;	// если строка была найдена - значит мы считаем, что у нас есть все переменные от Х1 до текущей (Х10)
+	//исходя из этой идеи мы	выбрали порядок проверки от 10 до 1
+		
+	found = input.find("X9"); //дальше все аналогично
+  	if (found != string::npos)
+		return 9;	
+		
+	found = input.find("X8");
+  	if (found != string::npos)
+		return 8;	
+		
+	found = input.find("X7");
+  	if (found != string::npos)
+		return 7;	
+		
+	found = input.find("X6");
+  	if (found != string::npos)
+		return 6;	
+		
+	found = input.find("X5");
+  	if (found != string::npos)
+		return 5;	
+		
+	found = input.find("X4");
+  	if (found != string::npos)
+		return 4;	
+		
+	found = input.find("X3");
+  	if (found != string::npos)
+		return 3;	
+		
+	found = input.find("X2");
+  	if (found != string::npos)
+		return 2;	
+		
+	found = input.find("X1");
+  	if (found != string::npos)
+		return 1;
+		
+	return 0; // если ничего не нашли	
+}
+
+string change(string input) // функция замены переменных на их значения из массива X[]
+{
+	size_t found;  // переменная, в которую будем писать результат поиска по строке
+	for(;;) { // это бесконечный цикл типа while()
+		found = input.find("X1"); // ищем первое вхождение переменной X1 в строке
+		if (found != string::npos) { // если оно там есть
+			input.replace(found, 2, X[1]); // заменяем символы X1 в найденой позиции на значение записанное в массиве (0 или 1)
+			continue; // снова идем на начало цикла. Нужно для того, чтобы заменить ВСЕ вхождения переменной
+	    }
+		found = input.find("X2"); //когда поменяли все Х1 - доходим до сюда и дальше аналогично
+		if (found != string::npos) {
+			input.replace(found, 2, X[2]);	
+			continue;
+	    }
+		found = input.find("X3");
+		if (found != string::npos) {
+			input.replace(found, 2, X[3]);	
+			continue;
+	    }
+		found = input.find("X4");
+		if (found != string::npos) {
+			input.replace(found, 2, X[4]);	
+			continue;
+	    }
+		found = input.find("X5");
+		if (found != string::npos) {
+			input.replace(found, 2, X[5]);	
+			continue;
+	    }
+		found = input.find("X6");
+		if (found != string::npos) {
+			input.replace(found, 2, X[6]);	
+			continue;
+	    }
+		found = input.find("X7");
+		if (found != string::npos) {
+			input.replace(found, 2, X[7]);	
+			continue;
+	    }
+		found = input.find("X8");
+		if (found != string::npos) {
+			input.replace(found, 2, X[8]);	
+			continue;
+	    }
+		found = input.find("X9");
+		if (found != string::npos) {
+			input.replace(found, 2, X[9]);	
+			continue;
+	    }
+		found = input.find("X10");
+		if (found != string::npos) {
+			input.replace(found, 3, X[10]);	
+			continue;
+	    }
+		break; // когда у нас больше вообще не осталось переменных - выходим из цикла
+	}
+	return input; // возвращаем полученный результат
+}
+
+string parse(string input) // основная функция - преобразование исходной формулы
+{
+	size_t found;  // переменная, в которую будем писать результат поиска по строке
+	for(;;) { //бесконечный цикл
+		//drop - // меняем все отрицания
+		found = input.find("-0");  // если нашли в строке -0
+  		if (found != string::npos) {
+			input.replace(found, 2, "1");	 // то вместо него вставляем 1
+			continue; // идем к началу цикла
+		}
+		
+		found = input.find("-1"); //если -1 - ставим 0
+  		if (found != string::npos) {
+			input.replace(found, 2, "0");	
+			continue;
+		}
+		
+		//drop brackets //удаляем лишние скобки
+		found = input.find("(0)"); // если нашли (0), то скобки можно убрать.
+  		if (found != string::npos) {
+			input.replace(found, 3, "0");	 //вместо символов (0) вписываем просто 0
+			continue;
+		}
+		
+		found = input.find("(1)");
+  		if (found != string::npos) {
+			input.replace(found, 3, "1");	
+			continue;
+		}
+		
+		//drop -> // разбираем выражение Х->Y по очереди смотрим все 4 варианта и вместо каждого из них ставим реальное значение из таблицы истинности функции "->"
+		found = input.find("0->0");
+  		if (found != string::npos) {
+			input.replace(found, 4, "1");	
+			continue;
+		}
+		
+		found = input.find("0->1");
+  		if (found != string::npos) {
+			input.replace(found, 4, "1");	
+			continue;
+		}
+		
+		found = input.find("1->0");
+  		if (found != string::npos) {
+			input.replace(found, 4, "0");	
+			continue;
+		}
+		
+		found = input.find("1->1");
+  		if (found != string::npos) {
+			input.replace(found, 4, "1");	
+			continue;
+		}
+		
+		//drop <>  // разбираем выражение Х<>Y
+		found = input.find("0<>0");
+  		if (found != string::npos) {
+			input.replace(found, 4, "1");	
+			continue;
+		}
+		
+		found = input.find("0<>1");
+  		if (found != string::npos) {
+			input.replace(found, 4, "0");	
+			continue;
+		}
+		
+		found = input.find("1<>0");
+  		if (found != string::npos) {
+			input.replace(found, 4, "0");	
+			continue;
+		}
+		
+		found = input.find("1<>1");
+  		if (found != string::npos) {
+			input.replace(found, 4, "1");	
+			continue;
+		}
+
+		//drop ^ // разбираем выражение Х^Y
+		found = input.find("0^0");
+  		if (found != string::npos) {
+			input.replace(found, 3, "0");	
+			continue;
+		}
+		
+		found = input.find("0^1");
+  		if (found != string::npos) {
+			input.replace(found, 3, "0");	
+			continue;
+		}
+		
+		found = input.find("1^0");
+  		if (found != string::npos) {
+			input.replace(found, 3, "0");	
+			continue;
+		}
+		
+		found = input.find("1^1");
+  		if (found != string::npos) {
+			input.replace(found, 3, "1");	
+			continue;
+		}
+		
+		//drop v // разбираем выражение ХvY
+		found = input.find("0v0");
+  		if (found != string::npos) {
+			input.replace(found, 3, "0");	
+			continue;
+		}
+		
+		found = input.find("0v1");
+  		if (found != string::npos) {
+			input.replace(found, 3, "1");	
+			continue;
+		}
+		
+		found = input.find("1v0");
+  		if (found != string::npos) {
+			input.replace(found, 3, "1");	
+			continue;
+		}
+		
+		found = input.find("1v1");
+  		if (found != string::npos) {
+			input.replace(found, 3, "1");	
+			continue;
+		}
+		break;	// если не нашли ни одного выражения - выходим из цикла	
+	}
+	//таким образом, у нас типа выполняется порядок операции - сначала отрицание, потом -> и <>, потом ^, и наконец v
+	//это типа работает, потому что мы всегда вначале выполняем выражения без скобок - это видно по выражениям, которые мы ищем в строке
+	//пример 0^(1v0) - из всех вариантов мы сначала найдем 1v0, получим строку 0^(1), дальше удаление скобок 0^1 и наконец получим ответ 0
+	//наоборот в случае 1v0^0 - мы в нашем порядке сначала найдем 0^0, потому что эта проверка в коде стоит раньше
+	return input;	
+}
+
+void dfs(int ind) // рекурсивня функция, которая генерирует все строки таблицы значений переменных
+{
+	if(!correct_input) // если у нас некорректное входное выражение - просто выходим отсюда
+		return;
+		
+	if(ind == kolX + 1) { // эта проверка определяет, что мы знаем значения всех переменных на текущем шаге алгоритма
+		//cout <<"end dfs "<<change(s)<<endl;
+		string result = parse(change(s)); // разбираем выражение. Сначала функцией change() делаем замену текстовых переменных на значение, потом parse() преобразует функцию в результат - строку 0 или 1
+
+		if (result != "0" && result != "1") { // если у нас не получился 0  или  1 - то некорректно входное выражение. 
+			correct_input = 0; //Ставим флаг, выходим
+			return;
+		}
+		
+		if(result == "0") { //если результат равен 0, то надо дописать кусок в sknf вида "^ (X1 v -X2)
+			if(sknf.size() > 0) // если в sknf это уже не первый блок, то дописываем в ее конец "^"
+				sknf += " ^ ";
+				
+			sknf += "(";	// дописываем в конец скобку
+			for(int i = 1; i <= kolX; i++) { // цикл по переменным от 1 до последней
+				if(X[i] == "1")
+					sknf += "-"; // если надо - приписываем отрицание
+				sknf += indstring(i); // дальше дописываем текстовое значение переменной по ее номеру
+				if(i < kolX) // если это не последняя переменная в скобках - добавляем 
+					sknf += " v ";
+			}
+			sknf += ")"; // закрываем скобку в этом блоке
+		}
+		
+		if(result == "1") { // если результат равен 1 - то пишем блок в sdnf аналогично прошлой функции
+			if(sdnf.size() > 0)
+				sdnf += " v ";
+				
+			sdnf += "(";	
+			for (int i = 1; i <= kolX; i++) { //(-x1 ^ x2 v -x3)
+				if(X[i] == "0")
+					sdnf += "-";
+				sdnf += indstring(i);
+				if(i < kolX)
+					sdnf += " ^ ";
+			}
+			sdnf += ")";	
+		}
+		return; // выполнили добавление нужного блока в ответ - выходим из этой ветки рекурсии
+	}
+	
+	// здесь мы оказываемся, когда у нас набраны еще не все значения переменных
+	X[ind] = '0'; // сначала подставляем значение 0
+	dfs(ind + 1); // и запускаем рекурсию от следующей переменной
+	
+	X[ind] = '1'; // потом подставляем 1 и делаем тоже самое
+	dfs(ind + 1);
+	// если понимаешь рекурсию - хорошо, если не до конца - можно писать очень долго
+	//но в общем этот блок перебирает все значения переменных от
+	// 0 0 0 0 0...
+	// до
+	// 1 1 1 1 1...
+}
+
+int main(int argc, char** argv) {
+	
+	for(;;) { //бесконечный цикл основной функции
+		cout <<"F="; 
+		getline(cin, s); // считываем введенную функцию
+		//s = "(X1 -> X2) ^ ((-X2 -> X3) -> -X1)";
+	
+		for(;;) { //удаляем все пробелы из нее. Т.е. ввод (X1 v X2) - корректный
+			size_t found = s.find(" "); //ищем
+  			if (found != string::npos) {
+				s.erase(found, 1); //удаляем
+				continue; // на начало цикла
+			}
+			break; // если нет пробелов - выходим из этого цикла, но не из основного
+		}
+	
+		correct_input = check(s); // проверка корректности введенной строки
+		kolX = count(s); // считаем количество переменных
+	
+		sknf = ""; // обнуляем ответы
+		sdnf = "";
+		dfs(1); // запускаем рекурсию от переменной с номером 1, получаем ответы в sknf и sdnf
+	
+		if(!correct_input) // если где-то была ошибка (проверка алфавита или при разборе (например функция 1111 - корректная по алфавиту, но некорректна по разбору))
+			cout <<"Incorrect expression"<<endl; // выводим ошибку
+		else {
+			cout <<"SKNF: "<<sknf<<endl<<endl; //иначе выводим ответы
+			cout <<"SDNF: "<<sdnf<<endl<<endl;
+		}
+	
+		for(;;) { // бесконечный цикл вопросов Артемову
+			cout <<"Continue Y/N?"<<endl; //Будем тестировать дальше или поставим отл?
+			getline(cin, s); //читаем ответ 
+			if(s == "Y") // если введенная строка "Y" - выходим из этого цикла и попадаем снова на начало программы
+				break;
+			if(s == "N") // если N - выходим вообще из всей программы
+				return 0;
+			// если не Y или N - мы снова идем на начало этого цикла и переспрашиваем Артемова.	
+		}
+	}	
+	return 0; //все.
+}
